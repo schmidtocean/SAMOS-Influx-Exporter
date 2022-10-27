@@ -16,7 +16,7 @@ python3 -m venv venv
 source /opt/samos_influx_exporter/venv/bin/activate
 pip install influxdb_client requests  pytz pyyaml
 ```
-## Setup the settings file
+## Create the settings file
 
 ### Create the settings file from the included template
 ```
@@ -24,7 +24,7 @@ cp settings.py.dist settings.py
 ```
 
 ### Modify the required fields
-This includes all the parts of the file where the variable name is capitalized. i.e. \<SHIP_NAME\>
+This includes all the parts of the file where the variable name is capitalized. i.e. `\<SHIP_NAME\>`
 
 ### Optional SAMOS configuration file
-The settings file includes a INLINE_CONFIG yaml-formatted string for defining how to map the InfluxDB data export to the SAMOS data format.  This part of the settings file can be overridden via the `--config_file <config_file>` command-line argument.  The contents of this config file must be a valid yaml object matching the schema of the INLINE_CONFIG string.
+The settings file includes a `INLINE_CONFIG` yaml-formatted string for defining how to map the InfluxDB data export to the SAMOS data format.  This part of the settings file can be overridden via the `--config_file <config_file>` command-line argument.  The contents of this config file must be a valid yaml object matching the schema of the INLINE_CONFIG string.
