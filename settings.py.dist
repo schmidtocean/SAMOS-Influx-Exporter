@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+'''
+FILE:           settings.py
+
+DESCRIPTION:    This file contains the settings used by the samos_exporter
+				        functions to communicate with the influxDB API and the Mailgun
+				        API.
+
+BUGS:
+NOTES:
+AUTHOR:     Webb Pinner
+COMPANY:    Schmidt Ocean Institute
+VERSION:    1.0
+CREATED:    2022-04-08
+REVISION:   2022-10-27
+
+LICENSE INFO:   This code is licensed under GPLv3 license (see LICENSE.txt for
+                details). Copyright (C) Schmidt Ocean Institute 2022
+'''
+
+# URL to influx server
+INFLUX_SERVER_URL = "http://localhost:8086"
+
+# Influx server authorization token
+INFLUX_TOKEN = "<YOUR_SECRET_TOKEN>"
+
+# Influx server org containing sensor data
+INFLUX_ORG = "openrvdas"
+
+# Influx server bucket containing sensor data
+INFLUX_BUCKET = "daily_minute_data"
+
+# Mailgun Settings
+MAILJET_APIKEY_PUBLIC = '<YOUR_MAILJET_APIKEY_PUBLIC>'
+MAILJET_APIKEY_PRIVATE = '<YOUR_MAILJET_APIKEY_PRIVATE>'
+MAILJET_FROM = { 'Email': '<FROM_EMAIL_ADDR>', 'Name': '<FROM_NAME>'}
+MAILJET_TO = [{ 'Email': '<TO_EMAIL_ADDR>', 'Name': '<TO_NAME>'}]
+MAILJET_CC = [] # or [{ 'Email': '<CC_EMAIL_ADDR>', 'Name': '<CC_NAME>'}]
+MAILJET_SUBJECT = 'SAMOS Exported Data'
+MAILJET_TEXT = 'Attached is the SAMOS-formatted data from <SHIP_NAME> for <date>\n' # Only modify <SHIP_NAME>, <date> is updated in samos_exporter.py
+
+# Email Filename Prefix
+EMAIL_FN_PREFIX = "<EMAIL_FN_PREFIX>" # i.e. FKt_SAMOS
+
+# Save-to-file Settings
+DEST_DIR = "/data/samos"
+FN_PREFIX = "<FN_PREFIX>" # i.e. FKt_SAMOS
+
+# Data needed to export/format data for SAMOS
+# <CALL_SIGN> --> KAOU
+# <INFLUXDB_MEASUREMENT_ARRAY> --> [ "posmv","true_wind_port","mpp_port" ]
+# <SAMOS_ID>: <INFLUXDB_FIELD> -->
+#     AT: MPP_Port_AirTemp
+#     BP: MPP_Port_AirPres
+#     CR: POSMV_CourseTrue
+#     GY: POSMV_HeadingTrue
+#     LA: POSMV_Latitude
+#     LO: POSMV_Longitude
+#     SP: POSMV_SpeedKt
+#     TI: Port_TrueWindDir
+#     TW: Port_TrueWindSpd
+#     WD: MPP_Port_WindDir
+#     WS: MPP_Port_WindSpd
+
+INLINE_CONFIG = '''
+callsign: "<CALL_SIGN>"
+measurements: <INFLUXDB_MEASUREMENT_ARRAY>
+fields:
+  <SAMOS_ID>: <INFLUXDB_FIELD>
+'''
