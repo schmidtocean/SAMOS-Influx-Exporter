@@ -157,8 +157,8 @@ if __name__ == '__main__':
     output = samos_data_builder.build_samos_csv(parsed_args.date)
 
     # If there is no output, exit
-    if next(output) is None:
-        logging.info("Quitting")
+    if next(output, None) is None:
+        logging.info("No data found, Quitting")
         sys.exit(0)
 
     # If the data should be emailed to SAMOS

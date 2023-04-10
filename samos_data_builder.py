@@ -128,10 +128,10 @@ class SAMOSDataBuilder():
 
         header = csv_result.__next__()
 
-        for idx, csv_line in enumerate(csv_result):
+        for _, csv_line in enumerate(csv_result):
             if not len(csv_line) == 0:
                 columns = [
-                    f'$SAMOS:{idx:03d}',
+                    f'$SAMOS:001',
                     f'CS:{self.callsign}',
                     f'YMD:{csv_line[header.index("_time")][:10].replace("-","")}',
                     f'HMS:{csv_line[header.index("_time")][11:19].replace(":","")}'
