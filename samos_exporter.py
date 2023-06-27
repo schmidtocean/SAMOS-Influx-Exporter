@@ -10,10 +10,10 @@ AUTHOR:     Webb Pinner
 COMPANY:    Schmidt Ocean Institute
 VERSION:    1.0
 CREATED:    2022-04-08
-REVISION:   2022-10-27
+REVISION:   2023-06-27
 
 LICENSE INFO:   This code is licensed under GPLv3 license (see LICENSE.txt for
-                details). Copyright (C) Schmidt Ocean Institute 2022
+                details). Copyright (C) Schmidt Ocean Institute 2023
 '''
 
 import os
@@ -22,6 +22,8 @@ import json
 import base64
 import logging
 import requests
+import tempfile
+import itertools
 import yaml
 from datetime import datetime, timedelta
 
@@ -34,13 +36,13 @@ from settings import MAILJET_APIKEY_PUBLIC, MAILJET_APIKEY_PRIVATE, \
                      MAILJET_TEXT, EMAIL_FN_PREFIX, FN_PREFIX, DEST_DIR, \
                      INLINE_CONFIG
 
-def send_samos_email(dt: datetime, samos_data):
+def send_samos_email(dt: datetime, samos_data_fp):
     '''
     Email exported SAMOS data based on settings
     '''
 
     message = ""
-    for line in samos_data:
+    for line in samos_data_fp:
         message+=line
 
     message_bytes = message.encode('ascii')
@@ -71,12 +73,13 @@ def send_samos_email(dt: datetime, samos_data):
         )
 
         logging.debug(json.dumps(res.json(), indent=2))
+
     except Exception as err:
         logging.error("Problem emailing SAMOS data")
         logging.debug(str(err))
 
 
-def save_to_file(dt: datetime, samos_data):
+def save_to_file(dt: datetime, samos_data_fp):
     '''
     Save exported SAMOS data to file
     '''
@@ -85,9 +88,8 @@ def save_to_file(dt: datetime, samos_data):
 
         samos_filename = os.path.join(DEST_DIR, f'{FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv')
 
-        with open(samos_filename, 'w') as samos_file:
-            for line in samos_data:
-                samos_file.write(line)
+        with open(samos_filename, 'w') as fp:
+            fp.write(samos_data_fp.read())
 
     except Exception as err:
         logging.error("Problem saving SAMOS data to file")
@@ -157,21 +159,34 @@ if __name__ == '__main__':
     output = samos_data_builder.build_samos_csv(parsed_args.date)
 
     # If there is no output, exit
-    if next(output, None) is None:
+    peek = next(output, None)
+    if peek is None:
         logging.info("No data found, Quitting")
         sys.exit(0)
 
-    # If the data should be emailed to SAMOS
-    if parsed_args.email:
-        logging.info("Emailing exported data to: %s", ', '.join([recipient['Email'] for recipient in MAILJET_TO]))
-        send_samos_email(parsed_args.date, output)
+    fd, path = tempfile.mkstemp()
 
-    # If the data should be emailed to SAMOS
-    if parsed_args.save:
-        logging.info("Saving exported data to: %s", os.path.join(DEST_DIR, f'{FN_PREFIX}_{parsed_args.date.strftime("%Y-%m-%d")}.csv'))
-        save_to_file(parsed_args.date, output)
+    try:
+        with os.fdopen(fd, 'r+') as fp:
+            for line in itertools.chain([peek], output):
+                fp.write(line)
 
-    # If the data was not emailed or saved to file, send to stdout
-    if not (parsed_args.email or parsed_args.save):
-        for line in output:
-            sys.stdout.write(line)
+            # If the data should be emailed to SAMOS
+            if parsed_args.email:
+                logging.info("Emailing exported data to: %s", ', '.join([recipient['Email'] for recipient in MAILJET_TO]))
+                fp.seek(0)
+                send_samos_email(parsed_args.date, fp)
+
+            # If the data should be emailed to SAMOS
+            if parsed_args.save:
+                logging.info("Saving exported data to: %s", os.path.join(DEST_DIR, f'{FN_PREFIX}_{parsed_args.date.strftime("%Y-%m-%d")}.csv'))
+                fp.seek(0)
+                save_to_file(parsed_args.date, fp)
+
+            # If the data was not emailed or saved to file, send to stdout
+            if not (parsed_args.email or parsed_args.save):
+                fp.seek(0)
+                print(fp.read())
+
+    finally:
+        os.remove(path)
