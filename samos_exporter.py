@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SAMOS Data Exporter')
 
-    parser.add_argument('-q', '--quite', action='store_true',
+    parser.add_argument('-q', '--quiet', action='store_true',
                         help='Increase output verbosity')
 
     parser.add_argument('-v', '--verbosity', dest='verbosity',
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
     LOG_LEVELS = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
 
-    if parsed_args.quite:
+    if parsed_args.quiet:
         logging.getLogger().setLevel(LOG_LEVELS[0])
     else:
         parsed_args.verbosity = min(parsed_args.verbosity, max(LOG_LEVELS))
