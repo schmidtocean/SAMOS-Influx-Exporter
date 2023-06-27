@@ -104,8 +104,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SAMOS Data Exporter')
 
+    parser.add_argument('-q', '--quite', action='store_true',
+                        help='Increase output verbosity')
+
     parser.add_argument('-v', '--verbosity', dest='verbosity',
-                        default=0, action='count',
+                        default=1, action='count',
                         help='Increase output verbosity')
 
     parser.add_argument('-d', '--date', default=(datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d'),
@@ -131,9 +134,13 @@ if __name__ == '__main__':
     LOGGING_FORMAT = '%(asctime)-15s %(levelname)s - %(message)s'
     logging.basicConfig(format=LOGGING_FORMAT)
 
-    LOG_LEVELS = {0: logging.WARNING, 1: logging.INFO, 2: logging.DEBUG}
-    parsed_args.verbosity = min(parsed_args.verbosity, max(LOG_LEVELS))
-    logging.getLogger().setLevel(LOG_LEVELS[parsed_args.verbosity])
+    LOG_LEVELS = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging:DEBUG}
+
+    if parsed_args.quite:
+        logging.getLogger().setLevel(LOG_LEVELS[0])
+    else:
+        parsed_args.verbosity = min(parsed_args.verbosity, max(LOG_LEVELS))
+        logging.getLogger().setLevel(LOG_LEVELS[parsed_args.verbosity])
 
     samos_data_config = None # pylint: disable=invalid-name
 
