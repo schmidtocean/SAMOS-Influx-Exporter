@@ -134,7 +134,7 @@ if __name__ == '__main__':
     LOGGING_FORMAT = '%(asctime)-15s %(levelname)s - %(message)s'
     logging.basicConfig(format=LOGGING_FORMAT)
 
-    LOG_LEVELS = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging:DEBUG}
+    LOG_LEVELS = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
 
     if parsed_args.quite:
         logging.getLogger().setLevel(LOG_LEVELS[0])
