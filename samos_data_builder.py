@@ -137,7 +137,11 @@ class SAMOSDataBuilder():
                     f'HMS:{csv_line[header.index("_time")][11:19].replace(":","")}'
                 ]
                 for key, val in self._fields.items():
-                    columns.append(f"{key}:{csv_line[header.index(val)]}")
+                    try:
+                        columns.append(f"{key}:{csv_line[header.index(val)]}")
+                    except ValueError as err:
+                        logging.warning(str(err))
+                        columns.append(f"{key}:NaN")
 
                 yield ",".join(columns) + '\n'
 
