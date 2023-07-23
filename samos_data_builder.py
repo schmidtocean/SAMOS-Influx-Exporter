@@ -17,6 +17,7 @@ LICENSE INFO:   This code is licensed under GPLv3 license (see LICENSE.txt for
 '''
 
 import sys
+import re
 import logging
 from datetime import datetime, timedelta
 import pytz
@@ -57,7 +58,7 @@ class SAMOSDataBuilder():
         self.logger = logging.getLogger(__name__)
 
         for field in self._fields.keys():
-            if field not in SAMOS_FIELDS:
+            if field[:2] not in SAMOS_FIELDS or re.search('^[A-Z]{2}[0-9]?', field) is None:
                 logging.warning('Field: %s is not a standard SAMOS field identifier', field)
 
     @staticmethod

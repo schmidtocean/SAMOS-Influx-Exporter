@@ -76,12 +76,13 @@ from(bucket: "openrvdas")
 
 # Usage
 ```
-usage: samos_exporter.py [-h] [-v] [-d DATE] [-e] [-s] [-f CONFIG_FILE]
+usage: samos_exporter.py [-h] [-q] [-v] [-d DATE] [-e] [-s] [-f CONFIG_FILE]
 
 SAMOS Data Exporter
 
 optional arguments:
   -h, --help            Show this help message and exit
+  -q, --quiet           Reduce vebosity to only errors
   -v, --verbosity       Increase output verbosity
   -d DATE, --date DATE  Date to export (YYYY-mm-dd)
   -e, --email           Email exported data to SAMOS
@@ -103,5 +104,5 @@ By default the script will return the SAMOS-formatted data to stdout. If the `-s
 Simpliest way to automatically run the script is `cron`. Here is the cron configuration to run the exporter at 5 minutes passed UTC midnight each UTC day.
 ```
 # m h  dom mon dow   command
-5 0 * * * su mt -c "python3 /opt/samos_influx_exporter/samos_exporter.py -s"
+5 0 * * * su mt -c "python3 /opt/samos_influx_exporter/samos_exporter.py -q -s"
 ```
