@@ -127,8 +127,11 @@ class SAMOSDataBuilder():
                                                         date_time_format="RFC3339")
                                                     )
 
-        header = csv_result.__next__()
-
+        try:
+            header = csv_result.__next__()
+        except:
+            pass
+    
         for _, csv_line in enumerate(csv_result):
             if not len(csv_line) == 0:
                 columns = [
