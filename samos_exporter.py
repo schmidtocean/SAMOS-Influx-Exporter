@@ -8,12 +8,12 @@ BUGS:
 NOTES:
 AUTHOR:     Webb Pinner
 COMPANY:    Schmidt Ocean Institute
-VERSION:    1.0
+VERSION:    1.1
 CREATED:    2022-04-08
-REVISION:   2023-06-27
+REVISION:   2024-08-14
 
 LICENSE INFO:   This code is licensed under GPLv3 license (see LICENSE.txt for
-                details). Copyright (C) Schmidt Ocean Institute 2023
+                details). Copyright (C) Schmidt Ocean Institute 2024
 '''
 
 import os
