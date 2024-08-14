@@ -105,7 +105,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SAMOS Data Exporter')
 
     parser.add_argument('-q', '--quiet', action='store_true',
-                        help='Increase output verbosity')
+                        help='Reduce output verbosity')
 
     parser.add_argument('-v', '--verbosity', dest='verbosity',
                         default=1, action='count',
