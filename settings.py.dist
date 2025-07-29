@@ -29,12 +29,14 @@ INFLUX_ORG = "openrvdas"
 # Influx server bucket containing sensor data
 INFLUX_BUCKET = "daily_minute_data"
 
+SHIP_NAME = "R/V Falkor (too)"
+
 # emailSettings
 MAILER_FROM = '<FROM_EMAIL_ADDR>'
 MAILER_TO = '<TO_EMAIL_ADDR>'
 MAILER_CC = [] # or [{ 'Email': '<CC_EMAIL_ADDR>', 'Name': '<CC_NAME>'}]
 MAILER_SUBJECT = 'SAMOS Exported Data'
-MAILER_TEXT = 'Attached is the SAMOS-formatted data from <SHIP_NAME> for <date>\n' # Only modify <SHIP_NAME>, <date> is updated in samos_exporter.py
+MAILER_TEXT = f'Attached is the SAMOS-formatted data from {SHIP_NAME} for <date>\n'
 
 # Email Filename Prefix
 EMAIL_FN_PREFIX = "<EMAIL_FN_PREFIX>" # i.e. FKt_SAMOS
