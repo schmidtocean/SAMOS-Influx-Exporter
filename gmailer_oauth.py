@@ -3,10 +3,10 @@ __status__ = "Production"
 __version__ = "1.3"
 __created__ = "2025-07"
 
-import os.path
-import logging
 import base64
+import logging
 import mimetypes
+import os
 from email.message import EmailMessage
 
 from google.auth.transport.requests import Request
@@ -14,18 +14,22 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# Set up logger for the module
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-class gMailer():
-    def __init__(self, token_file, client_secret_file, sender, recipient):      
+
+class GMailer:
+    def __init__(self, token_file, client_secret_file, sender, recipient):
         """
-        Initializes the Mailer by passing credentials and settings directly.
+        Initializes the Gmail client with credentials and settings.
 
         :param token_file: Path to the token.json file
         :param client_secret_file: Path to the client_secret.json file
         :param sender: Sender's email address
-        :param recipient: Recipient's email address
+        :param recipient: Recipient's email address (string or list)
         """
         self.token_file = token_file
         self.client_secret_file = client_secret_file
@@ -36,22 +40,22 @@ class gMailer():
 
     def gmail_init(self):
         """
-        Initializes the Gmail service using OAuth 2.0 credentials.
-        Code adapted from: https://developers.google.com/gmail/api/quickstart/python
+        Initializes the Gmail API client using OAuth 2.0 credentials.
         """
         SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-
         creds = None
+
         if os.path.exists(self.token_file):
-            creds = Credentials.from_authorized_user_file(self.token_file, SCOPES)
-        
+            creds = Credentials.from_authorized_user_file(self.token_file,
+                                                          SCOPES)
+
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                try: 
+                try:
                     creds.refresh(Request())
-                except Exception as e: 
-                    logger.error(f"Refreshing token {self.token_file} failed.")
-                    logger.error(e)
+                except Exception:
+                    logger.exception("Failed to refresh token: "
+                                     f"{self.token_file}")
                     return
             else:
                 try:
@@ -60,70 +64,80 @@ class gMailer():
                     )
                     creds = flow.run_local_server(port=0)
                 except FileNotFoundError:
-                    logger.error(f"Client secret file not found at {self.client_secret_file}")
+                    logger.exception("Client secret file not found: "
+                                     f"{self.client_secret_file}")
                     return
+
             with open(self.token_file, "w") as token:
                 token.write(creds.to_json())
 
         try:
-            self.service = build("gmail", "v1", credentials=creds)            
-            logger.info("Gmail service initialized successfully.")
-        except Exception as e:
-            logger.error(f"Failed to build Gmail service: {e}")
+            self.service = build("gmail", "v1", credentials=creds)
+            logger.info("Gmail service initialized.")
+        except Exception:
+            logger.exception("Failed to initialize Gmail service.")
 
-    def send_email(self, subject, body, attachments=None):
+    def send_email(self, subject, body, attachments=None, cc=None, bcc=None):
         """
-        Creates and sends an email with a subject, body, and optional attachments.
+        Sends an email with subject, body, attachments, and optional cc/bcc.
 
-        :param subject: The subject line of the email.
-        :param body: The plain text body of the email.
-        :param attachments: A list of file paths to attach to the email.
+        :param subject: Email subject line
+        :param body: Plain text body content
+        :param attachments: List of file paths to attach
+        :param cc: Optional CC recipient(s) (string or list)
+        :param bcc: Optional BCC recipient(s) (string or list)
         """
         if not self.service:
-            logger.error("Email service not initialized. Cannot send email.")
+            logger.error("Gmail service is not initialized.")
             return
 
+        def format_addr(field):
+            if not field:
+                return None
+            return ", ".join(field) if isinstance(field, list) else field
+
         message = EmailMessage()
-        if isinstance(self.recipient, list):
-            message["To"] = ", ".join(self.recipient)
-        else:
-            message["To"] = self.recipient
         message["From"] = self.sender
+        message["To"] = format_addr(self.recipient)
+        if cc:
+            message["Cc"] = format_addr(cc)
+        if bcc:
+            message["Bcc"] = format_addr(bcc)
         message["Subject"] = subject
         message.set_content(body)
 
         if attachments:
             for file_path in attachments:
                 if not os.path.exists(file_path):
-                    logger.warning(f"Attachment file not found: {file_path}. Skipping.")
+                    logger.warning(
+                        f"Attachment not found: {file_path}. Skipping.")
                     continue
-                
+
                 ctype, encoding = mimetypes.guess_type(file_path)
                 if ctype is None or encoding is not None:
-                    ctype = 'application/octet-stream'  # Default MIME type
-                
-                maintype, subtype = ctype.split('/', 1)
+                    ctype = "application/octet-stream"
 
-                with open(file_path, 'rb') as fp:
-                    message.add_attachment(fp.read(),
-                                           maintype=maintype,
-                                           subtype=subtype,
-                                           filename=os.path.basename(file_path))
+                maintype, subtype = ctype.split("/", 1)
+                with open(file_path, "rb") as fp:
+                    message.add_attachment(
+                        fp.read(),
+                        maintype=maintype,
+                        subtype=subtype,
+                        filename=os.path.basename(file_path),
+                    )
                 logger.info(f"Attached file: {file_path}")
 
-
-        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-        create_message = {"raw": encoded_message}
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        create_message = {"raw": raw_message}
 
         try:
-            send_request = self.service.users().messages().send(
-                userId=self.sender, 
-                body=create_message
-            )
-            sent_message = send_request.execute()
-            logger.info(f"Message Sent. Message ID: {sent_message['id']}")
-        except Exception as e:
-            logger.error(f"Message Failed to send: {e}")
+            response = self.service.users().messages().send(
+                userId="me", body=create_message
+            ).execute()
+            logger.info(f"Email sent. Message ID: {response['id']}")
+        except Exception:
+            logger.exception("Failed to send email.")
+
 
 if __name__ == "__main__":
     # This script is intended to be used as a module
@@ -131,18 +145,24 @@ if __name__ == "__main__":
     # Example:
     #
     # import logging
-    # from gmailer_oauth import Mailer
+    # from gmailer_oauth import GMailer
     #
     # logging.basicConfig(level=logging.INFO)
     #
-    # mailer = gMailer(
-    #     token_file='path/to/token.json',
-    #     client_secret_file='path/to/client_secret.json',
-    #     sender='your_email@gmail.com',
-    #     recipient='recipient_email@example.com'
+    # mailer = GMailer(
+    #                  "token.json",
+    #                  "client_secret.json",
+    #                  "me@example.com",
+    #                  "you@example.com"
+    #                  )
+    #
+    # mailer.send_email(
+    #   subject="Daily Report",
+    #   body="See attached logs.",
+    #   attachments=["report.txt"],
+    #   cc=["team@example.com"],
+    #   bcc="secret@example.com"
     # )
-    # mailer.send_email("Test Subject", "Test Body", ["path/to/attachment.txt"])
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logger.info("This script is a module and is not meant to be run directly")
     logger.info("Import Mailer class to use.")
