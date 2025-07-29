@@ -130,3 +130,7 @@ dmypy.json
 
 # Project-specific ignores
 settings.py
+
+# Client secret file
+token.json
+client_secret.json
