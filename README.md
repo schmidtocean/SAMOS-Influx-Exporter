@@ -12,7 +12,7 @@ git clone https://github.com/schmidtocean/SAMOS-Influx-Exporter.git /opt/samos_i
 cd /opt/samos_influx_exporter
 python3 -m venv venv
 source /opt/samos_influx_exporter/venv/bin/activate
-pip install influxdb_client requests  pytz pyyaml
+pip install -r requirements.txt
 ```
 
 3. Create the settings file from the included template:
