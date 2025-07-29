@@ -47,7 +47,7 @@ def send_samos_email(dt:datetime, samos_data_fp):
         recipient=MAILER_TO,
     )
     try:
-        mailer.send_email(f'{MAILER_SUBJECT} - {dt.strftime("%Y-%m-%d")}', MAILER_TEXT.replace('<date>', dt.strftime("%Y-%m-%d")), [f'{EMAIL_FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv'])
+        mailer.send_email(f'{MAILER_SUBJECT} - {dt.strftime("%Y-%m-%d")}', MAILER_TEXT.replace('<date>', dt.strftime("%Y-%m-%d")), [f'{DEST_DIR}/{EMAIL_FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv'])
 
     except Exception as err:
         logging.error("Problem emailing SAMOS data")
