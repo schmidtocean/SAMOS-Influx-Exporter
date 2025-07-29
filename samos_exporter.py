@@ -19,9 +19,7 @@ LICENSE INFO:   This code is licensed under GPLv3 license (see LICENSE.txt for
 import os
 import sys
 import json
-import base64
 import logging
-import requests
 import tempfile
 import itertools
 import yaml
@@ -31,53 +29,29 @@ from os.path import dirname, realpath
 sys.path.append(dirname(dirname(realpath(__file__))))
 
 from samos_data_builder import SAMOSDataBuilder
-from settings import MAILJET_APIKEY_PUBLIC, MAILJET_APIKEY_PRIVATE, \
-                     MAILJET_SUBJECT, MAILJET_FROM, MAILJET_TO, MAILJET_CC, \
-                     MAILJET_TEXT, EMAIL_FN_PREFIX, FN_PREFIX, DEST_DIR, \
+from settings import MAILER_SUBJECT, MAILER_FROM, MAILER_TO, MAILER_CC, \
+                     MAILER_TEXT, EMAIL_FN_PREFIX, FN_PREFIX, DEST_DIR, \
                      INLINE_CONFIG
 
-def send_samos_email(dt: datetime, samos_data_fp):
-    '''
-    Email exported SAMOS data based on settings
-    '''
 
-    message = ""
-    for line in samos_data_fp:
-        message+=line
+import logging
+from gmailer_oauth import gMailer
 
-    message_bytes = message.encode('ascii')
+logging.basicConfig(level=logging.INFO)
 
-    mailjet_data = {
-        # "SandboxMode": True,
-        "Messages": [{
-            "From": MAILJET_FROM,
-            "To": MAILJET_TO,
-            "Cc": MAILJET_CC,
-            "Subject": f'{MAILJET_SUBJECT} - {dt.strftime("%Y-%m-%d")}',
-            "TextPart": MAILJET_TEXT.replace('<date>', dt.strftime("%Y-%m-%d")),
-            "Attachments": [{
-                "Filename": f'{EMAIL_FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv',
-                "ContentType": "text/plain",
-                "Base64Content": base64.b64encode(message_bytes).decode()
-            }]
-        }]
-    }
-
-    logging.debug(json.dumps(mailjet_data, indent=2))
-
+def send_samos_email(dt:datetime, samos_data_fp):
+    mailer = gMailer(
+        token_file='token.json',
+        client_secret_file='client_secret.json',
+        sender=MAILER_FROM,
+        recipient=MAILER_TO,
+    )
     try:
-        res = requests.post(
-            "https://api.mailjet.com/v3.1/send",
-            auth=(MAILJET_APIKEY_PUBLIC, MAILJET_APIKEY_PRIVATE),
-            data=json.dumps(mailjet_data)
-        )
-
-        logging.debug(json.dumps(res.json(), indent=2))
+        mailer.send_email(f'{MAILER_SUBJECT} - {dt.strftime("%Y-%m-%d")}', MAILER_TEXT.replace('<date>', dt.strftime("%Y-%m-%d")), [f'{DEST_DIR}/{EMAIL_FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv'])
 
     except Exception as err:
         logging.error("Problem emailing SAMOS data")
         logging.debug(str(err))
-
 
 def save_to_file(dt: datetime, samos_data_fp):
     '''
@@ -85,7 +59,6 @@ def save_to_file(dt: datetime, samos_data_fp):
     '''
 
     try:
-
         samos_filename = os.path.join(DEST_DIR, f'{FN_PREFIX}_{dt.strftime("%Y-%m-%d")}.csv')
 
         with open(samos_filename, 'w') as fp:
@@ -180,7 +153,7 @@ if __name__ == '__main__':
 
             # If the data should be emailed to SAMOS
             if parsed_args.email:
-                logging.info("Emailing exported data to: %s", ', '.join([recipient['Email'] for recipient in MAILJET_TO]))
+                logging.info("Emailing exported data to: %s", MAILER_TO)
                 fp.seek(0)
                 send_samos_email(parsed_args.date, fp)
 

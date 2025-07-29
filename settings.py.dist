@@ -3,8 +3,7 @@
 FILE:           settings.py
 
 DESCRIPTION:    This file contains the settings used by the samos_exporter
-				        functions to communicate with the influxDB API and the Mailgun
-				        API.
+				        functions to communicate with the influxDB API and emailer
 
 BUGS:
 NOTES:
@@ -30,14 +29,12 @@ INFLUX_ORG = "openrvdas"
 # Influx server bucket containing sensor data
 INFLUX_BUCKET = "daily_minute_data"
 
-# Mailgun Settings
-MAILJET_APIKEY_PUBLIC = '<YOUR_MAILJET_APIKEY_PUBLIC>'
-MAILJET_APIKEY_PRIVATE = '<YOUR_MAILJET_APIKEY_PRIVATE>'
-MAILJET_FROM = { 'Email': '<FROM_EMAIL_ADDR>', 'Name': '<FROM_NAME>'}
-MAILJET_TO = [{ 'Email': '<TO_EMAIL_ADDR>', 'Name': '<TO_NAME>'}]
-MAILJET_CC = [] # or [{ 'Email': '<CC_EMAIL_ADDR>', 'Name': '<CC_NAME>'}]
-MAILJET_SUBJECT = 'SAMOS Exported Data'
-MAILJET_TEXT = 'Attached is the SAMOS-formatted data from <SHIP_NAME> for <date>\n' # Only modify <SHIP_NAME>, <date> is updated in samos_exporter.py
+# emailSettings
+MAILER_FROM = '<FROM_EMAIL_ADDR>'
+MAILER_TO = '<TO_EMAIL_ADDR>'
+MAILER_CC = [] # or [{ 'Email': '<CC_EMAIL_ADDR>', 'Name': '<CC_NAME>'}]
+MAILER_SUBJECT = 'SAMOS Exported Data'
+MAILER_TEXT = 'Attached is the SAMOS-formatted data from <SHIP_NAME> for <date>\n' # Only modify <SHIP_NAME>, <date> is updated in samos_exporter.py
 
 # Email Filename Prefix
 EMAIL_FN_PREFIX = "<EMAIL_FN_PREFIX>" # i.e. FKt_SAMOS
