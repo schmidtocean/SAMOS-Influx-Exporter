@@ -152,16 +152,16 @@ if __name__ == '__main__':
                 fp.write(line)
 
             # If the data should be emailed to SAMOS
-            if parsed_args.email:
-                logging.info("Emailing exported data to: %s", MAILER_TO)
-                fp.seek(0)
-                send_samos_email(parsed_args.date, fp)
-
-            # If the data should be emailed to SAMOS
             if parsed_args.save:
                 logging.info("Saving exported data to: %s", os.path.join(DEST_DIR, f'{FN_PREFIX}_{parsed_args.date.strftime("%Y-%m-%d")}.csv'))
                 fp.seek(0)
                 save_to_file(parsed_args.date, fp)
+
+            # If the data should be emailed to SAMOS
+            if parsed_args.email:
+                logging.info("Emailing exported data to: %s", MAILER_TO)
+                fp.seek(0)
+                send_samos_email(parsed_args.date, fp)
 
             # If the data was not emailed or saved to file, send to stdout
             if not (parsed_args.email or parsed_args.save):
