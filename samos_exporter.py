@@ -196,9 +196,9 @@ if __name__ == "__main__":
                 send_samos_email(parsed_args.date, samos_fp)
 
             if parsed_args.save:
-                dest_filename = os.path.join(DEST_DIR, samos_fn)
-                shutil.copy(samos_fp, dest_filename)
-                logging.info("Saved exported data to: %s", dest_filename)
+                dest_fp = os.path.join(DEST_DIR, samos_fn)
+                shutil.copy(samos_fp, dest_fp)
+                logging.info("Saved exported data to: %s", dest_fp)
 
     finally:
         os.remove(samos_fp)
