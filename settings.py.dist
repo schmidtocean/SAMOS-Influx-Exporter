@@ -29,12 +29,15 @@ INFLUX_ORG = "openrvdas"
 # Influx server bucket containing sensor data
 INFLUX_BUCKET = "daily_minute_data"
 
+# Ship name
+SHIP_NAME = "R/V Falkor (too)"
+
 # emailSettings
 MAILER_FROM = '<FROM_EMAIL_ADDR>'
 MAILER_TO = '<TO_EMAIL_ADDR>'
 MAILER_CC = [] # or [{ 'Email': '<CC_EMAIL_ADDR>', 'Name': '<CC_NAME>'}]
 MAILER_SUBJECT = 'SAMOS Exported Data'
-MAILER_TEXT = 'Attached is the SAMOS-formatted data from <SHIP_NAME> for <date>\n' # Only modify <SHIP_NAME>, <date> is updated in samos_exporter.py
+MAILER_TEXT = f'Attached is the SAMOS-formatted data from {SHIP_NAME} for <date>\n'
 
 # Email Filename Prefix
 EMAIL_FN_PREFIX = "<EMAIL_FN_PREFIX>" # i.e. FKt_SAMOS
@@ -44,20 +47,19 @@ DEST_DIR = "/data/samos"
 FN_PREFIX = "<FN_PREFIX>" # i.e. FKt_SAMOS
 
 # Data needed to export/format data for SAMOS
-# <CALL_SIGN> --> KAOU
-# <INFLUXDB_MEASUREMENT_ARRAY> --> [ "posmv","true_wind_port","mpp_port" ]
-# <SAMOS_ID>: <INFLUXDB_FIELD> -->
-#     AT: MPP_Port_AirTemp
-#     BP: MPP_Port_AirPres
-#     CR: POSMV_CourseTrue
-#     GY: POSMV_HeadingTrue
-#     LA: POSMV_Latitude
-#     LO: POSMV_Longitude
-#     SP: POSMV_SpeedKt
-#     TI: Port_TrueWindDir
-#     TW: Port_TrueWindSpd
-#     WD: MPP_Port_WindDir
-#     WS: MPP_Port_WindSpd
+# <CALL_SIGN> --> ZGOJ7
+# <INFLUXDB_MEASUREMENT_ARRAY> --> [ "posmv","mpp_mm_aft" ]
+# fields:
+#   <SAMOS_ID>: <INFLUXDB_FIELD> -->
+#   AT: MPP_MM_Aft_AirTemp
+#   BP: MPP_MM_Aft_AirPres
+#   CR: POSMV_CourseTrue
+#   GY: POSMV_HeadingTrue
+#   LA: POSMV_Latitude
+#   LO: POSMV_Longitude
+#   SP: POSMV_SpeedKt
+#   WD: MPP_MM_Aft_WindDir
+#   WS: MPP_MM_Aft_WindSpd
 
 INLINE_CONFIG = '''
 callsign: "<CALL_SIGN>"

@@ -4,15 +4,17 @@ Python utility for compiling a UTC day's worth of 1-min bin averaged Met/Seawate
 # Install
 1. Clone the local repo to the desired destination
 ```
-git clone https://github.com/schmidtocean/SAMOS-Influx-Exporter.git /opt/samos_influx_exporter
+cd ~
+git clone https://github.com/schmidtocean/SAMOS-Influx-Exporter.git
+sudo cp -r ./SAMOS-Influx-Exporter /opt/samos_influx_exporter
 ```
 
 2. Setup a python venv for the project
 ```
 cd /opt/samos_influx_exporter
 python3 -m venv venv
-source /opt/samos_influx_exporter/venv/bin/activate
-pip install influxdb_client requests  pytz pyyaml
+source ./venv/bin/activate
+pip install -r requirements.txt
 ```
 
 3. Create the settings file from the included template:
