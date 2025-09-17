@@ -24,6 +24,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 from datetime import datetime, timedelta
 from os.path import dirname, realpath
 
@@ -44,16 +45,27 @@ def send_samos_email(dt: datetime, attachment_path: str):
         sender=MAILER_FROM,
         recipient=MAILER_TO,
     )
-    try:
-        mailer.send_email(
-            subject=f'{MAILER_SUBJECT} - {dt.strftime("%Y-%m-%d")}',
-            body=MAILER_TEXT.replace("<date>", dt.strftime("%Y-%m-%d")),
-            attachments=[(attachment_path)],
-            cc=MAILER_CC
-        )
 
-    except Exception:
-        logging.exception("Problem emailing SAMOS data")
+    retries = 5
+    delay = 600
+
+    for attempt in range(retries):
+        try:
+            mailer.send_email(
+                subject=f'{MAILER_SUBJECT} - {dt.strftime("%Y-%m-%d")}',
+                body=MAILER_TEXT.replace("<date>", dt.strftime("%Y-%m-%d")),
+                attachments=[(attachment_path)],
+                cc=MAILER_CC
+            )
+            logging.info("Email sent successfully.")
+            return
+
+        except Exception as e:
+            logging.warning(f"Attempt {attempt + 1} of {retries} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(delay)
+            else:
+                logging.exception("All attempts to email SAMOS data failed.")
 
 
 def save_to_file(dt: datetime, samos_data_fp):
