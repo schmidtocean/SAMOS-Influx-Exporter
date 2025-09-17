@@ -132,6 +132,10 @@ if __name__ == "__main__":
     LOGGING_FORMAT = "%(asctime)-15s %(levelname)s - %(message)s"
     logging.basicConfig(format=LOGGING_FORMAT)
 
+    log_file_handler = logging.FileHandler("/var/log/samos-exporter/samos_exporter.log")
+    log_file_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+    logging.getLogger().addHandler(log_file_handler)
+
     LOG_LEVELS = {
         0: logging.ERROR,
         1: logging.WARNING,
